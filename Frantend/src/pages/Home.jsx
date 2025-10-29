@@ -1,9 +1,10 @@
 import React from 'react'
+import Nav from '../components/Nav'
 
 const Home = () => {
   return (
-    <div>
-      home page
+    <div className='w-full min-h-[100vh] bg-[#f1f1ee]'>
+      <Nav/>
     </div>
   )
 }

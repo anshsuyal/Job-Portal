@@ -3,56 +3,68 @@ import logo from "../assets/logo.svg";
 import { useNavigate } from "react-router-dom";
 import { authDataContext } from "../context/AuthContext";
 import axios from "axios";
+import { UserDataContext } from "../context/userContext";
 
 function Signup() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const { serverUrl } = useContext(authDataContext);
+  const { setUserData } = useContext(UserDataContext);
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [userName, setUserName] = useState("");
-  const [email, setEmailName] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [err,setErr] = useState("")
+  const [err, setErr] = useState("");
 
   const togglePassword = () => setShowPassword(!showPassword);
 
   const handleSignUp = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setErr("");
+
+    if (!serverUrl) {
+      setErr("Server configuration missing.");
+      setLoading(false);
+      return;
+    }
 
     if (!firstName || !lastName || !userName || !email || !password) {
-      alert("Please fill in all fields.");
+      setErr("Please fill in all fields.");
       setLoading(false);
       return;
     }
 
     try {
-      let result = await axios.post(
+      const result = await axios.post(
         `${serverUrl}/api/auth/signup`,
         { firstName, lastName, userName, email, password },
         { withCredentials: true }
       );
 
-      console.log(result);
+      console.log(result.data);
       alert("Signup successful! Please log in.");
 
-      // Reset form and loader
-      setErr("");
+      // If backend returns user data
+      if (result.data.user) setUserData(result.data.user);
+
+      // Reset form
       setFirstName("");
       setLastName("");
-      setEmailName("");
-      setPassword("");
       setUserName("");
+      setEmail("");
+      setPassword("");
+      setErr("");
       setLoading(false);
 
       navigate("/login");
     } catch (error) {
-      setErr(error.response.data.message)
+      const message = error.response?.data?.message || "Signup failed. Please try again.";
+      setErr(message);
       setLoading(false);
-      alert(error.response?.data?.message || "Signup failed. Please try again.");
     }
   };
 
@@ -100,7 +112,7 @@ function Signup() {
           disabled={loading}
           className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
           value={email}
-          onChange={(e) => setEmailName(e.target.value)}
+          onChange={(e) => setEmail(e.target.value)}
         />
 
         <div className="relative">
@@ -118,12 +130,15 @@ function Signup() {
             className="absolute right-3 top-2.5 text-blue-500"
             disabled={loading}
           >
-            {showPassword ? "Hide" : "show"}
+            {showPassword ? "Hide" : "Show"}
           </button>
         </div>
-        {err && <p className="text-center text-red-500">
-        *{err}
-        </p>}
+
+        {err && (
+          <div className="bg-red-100 text-red-600 p-2 rounded-md text-center text-sm">
+            {err}
+          </div>
+        )}
 
         <button
           type="submit"

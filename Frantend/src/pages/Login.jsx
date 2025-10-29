@@ -3,10 +3,12 @@ import logo from "../assets/logo.svg";
 import { useNavigate } from "react-router-dom";
 import { authDataContext } from "../context/AuthContext";
 import axios from "axios";
+import { UserDataContext } from "../context/userContext";
 
 const Login = () => {
   const navigate = useNavigate();
   const { serverUrl } = useContext(authDataContext);
+  const { setUserData } = useContext(UserDataContext);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,8 +20,8 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setErr("");
+    setLoading(true);
 
     if (!email || !password) {
       setErr("Please fill in all fields.");
@@ -31,15 +33,24 @@ const Login = () => {
       const result = await axios.post(
         `${serverUrl}/api/auth/login`,
         { email, password },
-        { withCredentials: true }
+        {
+          withCredentials: true, // Important: allow cookies
+        }
       );
 
-      console.log(result.data);
-      alert("Login successful!");
-      setLoading(false);
+      console.log("Login Response:", result.data);
 
-      navigate("/"); // redirect to home/dashboard after login
+      alert("Login successful!");
+
+      // Optionally store user data globally
+      if (result.data.user) {
+        setUserData(result.data.user);
+      }
+
+      setLoading(false);
+      navigate("/"); // redirect after successful login
     } catch (error) {
+      console.error("Login Error:", error);
       const message =
         error.response?.data?.message || "Login failed. Please try again.";
       setErr(message);

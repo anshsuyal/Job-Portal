@@ -2,7 +2,6 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { authDataContext } from "./AuthContext";
 import axios from "axios";
 
-// ✅ Named export (this is what App.jsx is trying to import)
 export const UserDataContext = createContext();
 
 function UserContext({ children }) {
