@@ -12,7 +12,7 @@ let app = express();
 app.use(express.json())
 app.use(cookieParser())
 app.use(cors({
-  origin:"http://localhost:5175",
+  origin: true,
   credentials:true
 }))
 let port = process.env.PORT || 5000 

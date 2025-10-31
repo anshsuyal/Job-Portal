@@ -6,6 +6,7 @@ export const UserDataContext = createContext();
 
 function UserContext({ children }) {
   const [userData, setUserData] = useState(null);
+  const [edit, setEdit] = useState(false); // ✅ moved inside component
   const { serverUrl } = useContext(authDataContext);
 
   const getCurrentUser = async () => {
@@ -24,7 +25,7 @@ function UserContext({ children }) {
     getCurrentUser();
   }, []);
 
-  const value = { userData, setUserData };
+  const value = { userData, setUserData, edit, setEdit };
 
   return (
     <UserDataContext.Provider value={value}>
