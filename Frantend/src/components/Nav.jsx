@@ -101,7 +101,7 @@ const Nav = () => {
           className="w-[45px] h-[45px] rounded-full overflow-hidden border border-gray-300 cursor-pointer"
           onClick={() => setShowProfileMenu(!showProfileMenu)}
         >
-          <img src={dp} alt="Profile" className="w-full h-full object-cover" />
+          <img src={userData.profileImage || dp} alt="Profile" className="w-full h-full object-cover" />
         </div>
 
         {/* Profile Dropdown */}
@@ -111,7 +111,7 @@ const Nav = () => {
             className="w-[280px] bg-white shadow-xl absolute top-[75px] right-0 rounded-lg flex flex-col items-center p-[20px] gap-[12px] animate-fadeIn"
           >
             <div className="w-[70px] h-[70px] rounded-full overflow-hidden border border-gray-300">
-              <img src={dp} alt="Profile" className="w-full h-full object-cover" />
+              <img src={userData.profileImage || dp} alt="Profile" className="w-full h-full object-cover" />
             </div>
 
             <div className="font-semibold text-gray-800 text-lg text-center">

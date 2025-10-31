@@ -59,9 +59,7 @@ function EditProfile() {
     setSkills(skills.filter((_, i) => i !== index));
   };
 
-  {
-    /* Save Profile Handle */
-  }
+  { /* Save Profile Handle */ }
   const handleSaveProfile = async () => {
     try {
       let formdata = new FormData();
@@ -70,8 +68,7 @@ function EditProfile() {
       formdata.append("userName", userName);
       formdata.append("headline", headline);
       formdata.append("location", location);
-      formdata.append("skills", skills);
-      formdata.append("experience", experience);
+      formdata.append("skills", JSON.stringify(skills));
 
       if (backendProfileImage) {
         formdata.append("profileImage", backendProfileImage);
@@ -86,7 +83,9 @@ function EditProfile() {
         formdata,
         { withCredentials: true }
       );
-      console.log(result);
+      setUserData(result.data)
+      setEdit(false)
+
     } catch (error) {
       console.log(error);
     }

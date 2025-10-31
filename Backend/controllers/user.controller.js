@@ -20,7 +20,6 @@ export const updateProfile = async (req,res) =>{
   try {
     const {firstName, lastName, userName, headline, location, gender} = req.body
     const skills = req.body.skills?JSON.parse(req.body.skills):[]
-    const experience = req.body.experience?JSON.parse(req.body.experience):[]
 
     let profileImage;
     let coverImage
@@ -35,7 +34,7 @@ export const updateProfile = async (req,res) =>{
 
     let user = await User.findByIdAndUpdate(req.userId,{
       firstName,lastName,userName,headline,location,gender,skills,experience,profileImage,coverImage
-    }).select("-password")
+    },{new:true}).select("-password")
     return res.status(200).json(user)
 
   } catch (error) {
@@ -43,5 +42,5 @@ export const updateProfile = async (req,res) =>{
     return res.status(500).json({message:"update profile"})
     
   }
-
+z
 }
