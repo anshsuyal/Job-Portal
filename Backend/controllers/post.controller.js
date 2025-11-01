@@ -8,7 +8,7 @@ export const createPost = async (req, res) => {
 
     if (req.file) {
       // ✅ Upload image to Cloudinary
-      const result = await uploadOnCloudinary(req.file.);
+      const result = await uploadOnCloudinary(req.file.path);
 
       // ✅ Store secure_url instead of full object
       newPost = await Post.create({
@@ -29,3 +29,13 @@ export const createPost = async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+export const getPost = async (req,res) =>{
+  try {
+    const post = await Post.find()
+    return res.status(200).json(post)
+  } catch (error) {
+    return res.status(500).json({message:"getPost error"})
+    
+  }
+}

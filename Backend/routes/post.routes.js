@@ -1,9 +1,11 @@
 import express from "express";
-import { createPost } from "../controllers/post.controller.js";
+import { createPost, getPost } from "../controllers/post.controller.js";
 import upload from "../middlewares/multer.js";
+import isAuth from "../middlewares/isAuth.js";
 
-const router = express.Router();
+const postRouter = express.Router();
 
-router.post("/create",  upload.single("image"), createPost);
+postRouter.post("/create", isAuth ,upload.single("image"), createPost);
+postRouter.post("/getpost",isAuth,getPost)
 
-export default router;
+export default postRouter;

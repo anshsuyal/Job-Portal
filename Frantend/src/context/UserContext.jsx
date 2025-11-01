@@ -21,8 +21,22 @@ function UserContext({ children }) {
     }
   };
 
+  const getPost = async() => {
+    try {
+      let result = await axios.get(serverUrl+"/api/post/getpost",{
+        withCredentials:true
+      })
+      console.log(result);
+      
+    } catch (error) {
+      console.log(error);
+      
+    }
+  }
+
   useEffect(() => {
     getCurrentUser();
+    getPost()
   }, []);
 
   const value = { userData, setUserData, edit, setEdit };
