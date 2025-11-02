@@ -1,288 +1,438 @@
-import React, { useContext, useRef, useState } from "react";
+import React, { useContext, useRef, useState } from 'react'
 import { RxCross1 } from "react-icons/rx";
-import { UserDataContext } from "../context/userContext";
+import { userDataContext } from '../context/UserContext';
 import dp from "../assets/dp.jpg";
-import { FaCamera } from "react-icons/fa";
-import axios from "axios";
-import { authDataContext } from "../context/AuthContext";
+import { FiPlus } from "react-icons/fi";
+import { FiCamera } from "react-icons/fi";
+import axios from 'axios';
+import { authDataContext } from '../context/AuthContext';
 
 function EditProfile() {
-  const { edit, setEdit, userData, setUserData } = useContext(UserDataContext);
-  const { serverUrl } = useContext(authDataContext);
+  let { edit, setEdit, userData, setUserData, edit2, setEdit2 } = useContext(userDataContext)
+  let { serverUrl } = useContext(authDataContext)
+  let [firstName, setFirstName] = useState(userData.firstName || "")
+  let [lastName, setLastName] = useState(userData.lastName || "")
+  let [userName, setUserName] = useState(userData.userName || "")
+  let [headline, setHeadline] = useState(userData.headline || "")
+  let [location, setLocation] = useState(userData.location || "")
+  let [gender, setGender] = useState(userData.gender || "")
+  let [skills, setSkills] = useState(userData.skills || [])
+  let [newSkills, setNewSkills] = useState("")
+  let [education, setEducation] = useState(userData.education || [])
+  let [newEducation, setNewEducation] = useState({
+    college: "",
+    degree: "",
+    fieldOfStudy: ""
+  })
+  let [experience, setExperience] = useState(userData.experience || [])
+  let [newExperience, setNewExperience] = useState({
+    title: "",
+    company: "",
+    description: ""
+  })
 
-  const [firstName, setFirstName] = useState(userData.firstName || "");
-  const [lastName, setLastName] = useState(userData.lastName || "");
-  const [userName, setUserName] = useState(userData.userName || "");
-  const [headline, setHeadline] = useState(userData.headline || "");
-  const [location, setLocation] = useState(userData.location || "");
-  const [gender, setGender] = useState(userData.gender || "");
-  const [skills, setSkills] = useState(userData.skills || []);
-  const [newSkill, setNewSkill] = useState("");
+  let [frontendProfileImage, setFrontendProfileImage] = useState(userData.profileImage || dp)
+  let [backendProfileImage, setBackendProfileImage] = useState(null)
+  let [frontendCoverImage, setFrontendCoverImage] = useState(userData.coverImage || null)
+  let [backendCoverImage, setBackendCoverImage] = useState(null)
+  let [saving, setSaving] = useState(false)
+  const profileImage = useRef()
+  const coverImage = useRef()
 
-  // For image preview
-  const [profilePreview, setProfilePreview] = useState(
-    userData.profileImage || dp
-  );
-  const [coverPreview, setCoverPreview] = useState(userData.coverImage || "");
-
-  const profileImage = useRef();
-  const coverImage = useRef();
-
-  // Handle image upload preview
-  const handleProfileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setProfilePreview(reader.result);
-      reader.readAsDataURL(file);
+  function addSkill(e) {
+    e.preventDefault()
+    if (newSkills && !skills.includes(newSkills)) {
+      setSkills([...skills, newSkills])
     }
-  };
+    setNewSkills("")
+  }
 
-  const handleCoverChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setCoverPreview(reader.result);
-      reader.readAsDataURL(file);
+  function removeSkill(skill) {
+    if (skills.includes(skill)) {
+      setSkills(skills.filter((s) => s !== skill))
     }
-  };
+  }
 
-  const handleAddSkill = (e) => {
-    e.preventDefault();
-    if (newSkill.trim() && !skills.includes(newSkill)) {
-      setSkills([...skills, newSkill.trim()]);
-      setNewSkill("");
+  function addEducation(e) {
+    e.preventDefault()
+    if (newEducation.college && newEducation.degree && newEducation.fieldOfStudy) {
+      setEducation([...education, newEducation])
     }
-  };
+    setNewEducation({
+      college: "",
+      degree: "",
+      fieldOfStudy: ""
+    })
+  }
 
-  const handleRemoveSkill = (index) => {
-    setSkills(skills.filter((_, i) => i !== index));
-  };
+  function addExperience(e) {
+    e.preventDefault()
+    if (newExperience.title && newExperience.company && newExperience.description) {
+      setExperience([...experience, newExperience])
+    }
+    setNewExperience({
+      title: "",
+      company: "",
+      description: ""
+    })
+  }
 
-  { /* Save Profile Handle */ }
+  function removeEducation(edu) {
+    if (education.includes(edu)) {
+      setEducation(education.filter((e) => e !== edu))
+    }
+  }
+
+  function removeExperience(exp) {
+    if (experience.includes(exp)) {
+      setExperience(experience.filter((e) => e !== exp))
+    }
+  }
+
+  function handleProfileImage(e) {
+    let file = e.target.files[0]
+    setBackendProfileImage(file)
+    setFrontendProfileImage(URL.createObjectURL(file))
+  }
+
+  function handleCoverImage(e) {
+    let file = e.target.files[0]
+    setBackendCoverImage(file)
+    setFrontendCoverImage(URL.createObjectURL(file))
+  }
+
   const handleSaveProfile = async () => {
+    setSaving(true)
     try {
-      let formdata = new FormData();
-      formdata.append("firstName", firstName);
-      formdata.append("lastName", lastName);
-      formdata.append("userName", userName);
-      formdata.append("headline", headline);
-      formdata.append("location", location);
-      formdata.append("skills", JSON.stringify(skills));
+      let formdata = new FormData()
+      formdata.append("firstName", firstName)
+      formdata.append("lastName", lastName)
+      formdata.append("userName", userName)
+      formdata.append("headline", headline)
+      formdata.append("location", location)
+      formdata.append("skills", JSON.stringify(skills))
+      formdata.append("education", JSON.stringify(education))
+      formdata.append("experience", JSON.stringify(experience))
 
       if (backendProfileImage) {
-        formdata.append("profileImage", backendProfileImage);
+        formdata.append("profileImage", backendProfileImage)
       }
-
       if (backendCoverImage) {
-        formdata.append("coverImage", backendCoverImage);
+        formdata.append("coverImage", backendCoverImage)
       }
 
-      let result = await axios.put(
-        serverUrl + "/api/user/updateprofile",
-        formdata,
-        { withCredentials: true }
-      );
+      let result = await axios.put(serverUrl + "/api/user/updateprofile", formdata, { withCredentials: true })
       setUserData(result.data)
+      setSaving(false)
       setEdit(false)
 
     } catch (error) {
       console.log(error);
+      setSaving(false)
     }
-  };
-
-  const handleSave = (e) => {
-    e.preventDefault();
-    setUserData({
-      ...userData,
-      firstName,
-      lastName,
-      userName,
-      headline,
-      location,
-      gender,
-      skills,
-      profileImage: profilePreview,
-      coverImage: coverPreview,
-    });
-    setEdit(false);
-  };
+  }
 
   return (
-    <div className="w-full h-[100vh] fixed top-0 z-[100] flex justify-center items-center overflow-scroll">
-      {/* Hidden file inputs */}
-      <input
-        type="file"
-        accept="image/*"
-        hidden
-        ref={profileImage}
-        onChange={handleProfileChange}
-      />
-      <input
-        type="file"
-        accept="image/*"
-        hidden
-        ref={coverImage}
-        onChange={handleCoverChange}
-      />
-
-      {/* Overlay */}
-      <div className="w-full h-full bg-black opacity-[0.5] absolute"></div>
-
-      {/* Main Card */}
-      <div className="w-[90%] max-w-[500px] bg-white relative z-[200] shadow-xl rounded-lg overflow-hidden animate-fadeIn">
-        {/* Close Button */}
-        <div
-          className="absolute top-[20px] right-[20px] cursor-pointer hover:scale-110 transition"
-          onClick={() => setEdit(false)}
-        >
-          <RxCross1 className="text-gray-800 w-[25px] h-[25px]" />
+    <div className='w-full h-[100vh] fixed top-0 left-0 z-[100] flex justify-center items-center p-4'>
+      <input type="file" accept='image/*' hidden ref={profileImage} onChange={handleProfileImage} />
+      <input type="file" accept='image/*' hidden ref={coverImage} onChange={handleCoverImage} />
+      
+      {/* Backdrop */}
+      <div 
+        className='w-full h-full bg-black/60 absolute top-0 left-0 backdrop-blur-sm transition-opacity duration-300'
+        onClick={() => setEdit(false)}
+      ></div>
+      
+      {/* Modal */}
+      <div className='w-full max-w-2xl max-h-[90vh] bg-white relative overflow-auto z-[200] shadow-2xl rounded-xl p-6 animate-fade-in'>
+        {/* Header */}
+        <div className='flex justify-between items-center mb-6 pb-4 border-b border-gray-200'>
+          <h2 className='text-2xl font-bold text-gray-800'>Edit Profile</h2>
+          <button 
+            onClick={() => setEdit(false)}
+            className='p-2 hover:bg-gray-100 rounded-full transition-colors duration-200'
+          >
+            <RxCross1 className='w-6 h-6 text-gray-600 hover:text-gray-800' />
+          </button>
         </div>
 
         {/* Cover Photo */}
-        <div
-          className="w-full h-[180px] bg-gray-200 relative flex items-center justify-center cursor-pointer"
-          onClick={() => coverImage.current.click()}
-        >
-          {coverPreview ? (
-            <img
-              src={coverPreview}
-              alt="Cover"
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <p className="text-gray-500">Click to upload cover photo</p>
-          )}
-          <FaCamera className="absolute right-4 top-4 text-white text-xl opacity-80 hover:opacity-100" />
+        <div className='relative mb-16'>
+          <div 
+            className='w-full h-32 bg-gradient-to-r from-blue-400 to-purple-500 rounded-xl overflow-hidden cursor-pointer group relative'
+            onClick={() => coverImage.current.click()}
+          >
+            {frontendCoverImage && (
+              <img src={frontendCoverImage} alt="Cover" className='w-full h-full object-cover' />
+            )}
+            <div className='absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center'>
+              <FiCamera className='w-6 h-6 text-white' />
+            </div>
+          </div>
+          
+          {/* Profile Photo */}
+          <div className='absolute -bottom-12 left-6'>
+            <div 
+              className='w-24 h-24 rounded-full border-4 border-white shadow-lg overflow-hidden cursor-pointer group relative'
+              onClick={() => profileImage.current.click()}
+            >
+              <img src={frontendProfileImage} alt="Profile" className='w-full h-full object-cover' />
+              <div className='absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center'>
+                <FiCamera className='w-5 h-5 text-white' />
+              </div>
+            </div>
+            <div className='absolute bottom-1 right-1 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center cursor-pointer border-2 border-white shadow-sm'>
+              <FiPlus className='w-3 h-3 text-white' />
+            </div>
+          </div>
         </div>
 
-        {/* Profile Picture */}
-        <div
-          className="absolute top-[120px] left-6 w-[80px] h-[80px] rounded-full overflow-hidden border-4 border-white shadow-lg cursor-pointer"
-          onClick={() => profileImage.current.click()}
-        >
-          <img
-            src={profilePreview}
-            alt="Profile"
-            className="w-full h-full object-cover"
-          />
-        </div>
+        {/* Form Content */}
+        <div className='space-y-4 max-h-[60vh] overflow-y-auto pr-2'>
+          {/* Basic Info Grid */}
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+            <div>
+              <label className='block text-sm font-medium text-gray-700 mb-1'>First Name</label>
+              <input 
+                type="text" 
+                className='w-full h-12 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none'
+                value={firstName} 
+                onChange={(e) => setFirstName(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className='block text-sm font-medium text-gray-700 mb-1'>Last Name</label>
+              <input 
+                type="text" 
+                className='w-full h-12 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none'
+                value={lastName} 
+                onChange={(e) => setLastName(e.target.value)}
+              />
+            </div>
+          </div>
 
-        {/* Form Section */}
-        <form
-          className="w-full flex flex-col items-center justify-center gap-5 mt-20 px-6 pb-6"
-          onSubmit={handleSave}
-        >
-          {/* FIRST + LAST NAME */}
-          <div className="w-full flex flex-col sm:flex-row gap-4">
-            <input
-              type="text"
-              placeholder="First Name"
-              className="w-full sm:w-1/2 border border-gray-300 rounded-lg px-4 py-2 text-gray-700 focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none shadow-sm transition-all duration-200"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-            />
-            <input
-              type="text"
-              placeholder="Last Name"
-              className="w-full sm:w-1/2 border border-gray-300 rounded-lg px-4 py-2 text-gray-700 focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none shadow-sm transition-all duration-200"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
+          <div>
+            <label className='block text-sm font-medium text-gray-700 mb-1'>Username</label>
+            <input 
+              type="text" 
+              className='w-full h-12 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none'
+              value={userName} 
+              onChange={(e) => setUserName(e.target.value)}
             />
           </div>
 
-          {/* USERNAME */}
-          <input
-            type="text"
-            placeholder="Username"
-            className="w-full border border-gray-300 rounded-lg px-4 py-2 text-gray-700 shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none transition-all duration-200"
-            value={userName}
-            onChange={(e) => setUserName(e.target.value)}
-          />
+          <div>
+            <label className='block text-sm font-medium text-gray-700 mb-1'>Headline</label>
+            <input 
+              type="text" 
+              className='w-full h-12 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none'
+              value={headline} 
+              onChange={(e) => setHeadline(e.target.value)}
+            />
+          </div>
 
-          {/* HEADLINE */}
-          <input
-            type="text"
-            placeholder="Headline (e.g., Full Stack Developer)"
-            className="w-full border border-gray-300 rounded-lg px-4 py-2 text-gray-700 shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none transition-all duration-200"
-            value={headline}
-            onChange={(e) => setHeadline(e.target.value)}
-          />
-
-          {/* LOCATION */}
-          <input
-            type="text"
-            placeholder="Location"
-            className="w-full border border-gray-300 rounded-lg px-4 py-2 text-gray-700 shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none transition-all duration-200"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-          />
-
-          {/* GENDER */}
-          <select
-            value={gender}
-            onChange={(e) => setGender(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-4 py-2 text-gray-700 shadow-sm bg-white focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none transition-all duration-200"
-          >
-            <option value="">Select Gender</option>
-            <option value="male">Male</option>
-            <option value="female">Female</option>
-            <option value="other">Other</option>
-          </select>
-
-          {/* SKILLS */}
-          <div className="w-full border border-gray-200 rounded-lg p-4 shadow-sm">
-            <h3 className="text-sm font-semibold text-gray-700 mb-2">Skills</h3>
-            <div className="flex flex-wrap gap-2 mb-3">
-              {skills.length > 0 ? (
-                skills.map((skill, index) => (
-                  <span
-                    key={index}
-                    className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm flex items-center gap-2"
-                  >
-                    {skill}
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveSkill(index)}
-                      className="text-xs text-red-500 hover:text-red-700"
-                    >
-                      ✕
-                    </button>
-                  </span>
-                ))
-              ) : (
-                <p className="text-gray-400 text-sm">No skills added yet.</p>
-              )}
-            </div>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                placeholder="Add new skill"
-                value={newSkill}
-                onChange={(e) => setNewSkill(e.target.value)}
-                className="flex-grow border border-gray-300 rounded-lg px-3 py-2 text-gray-700 shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none transition-all duration-200"
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+            <div>
+              <label className='block text-sm font-medium text-gray-700 mb-1'>Location</label>
+              <input 
+                type="text" 
+                className='w-full h-12 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none'
+                value={location} 
+                onChange={(e) => setLocation(e.target.value)}
               />
-              <button
-                onClick={handleAddSkill}
-                className="bg-blue-500 text-white px-4 rounded-lg hover:bg-blue-600 transition"
+            </div>
+            <div>
+              <label className='block text-sm font-medium text-gray-700 mb-1'>Gender</label>
+              <input 
+                type="text" 
+                placeholder="Male/Female/Other"
+                className='w-full h-12 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none'
+                value={gender} 
+                onChange={(e) => setGender(e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* Skills Section */}
+          <div className="border border-gray-200 rounded-xl p-4 bg-gray-50/50">
+            <h3 className='text-lg font-semibold text-gray-800 mb-3'>Skills</h3>
+            {skills.length > 0 && (
+              <div className='flex flex-wrap gap-2 mb-3'>
+                {skills.map((skill, index) => (
+                  <div 
+                    key={index} 
+                    className='flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-gray-200 shadow-sm'
+                  >
+                    <span className='text-sm text-gray-700'>{skill}</span>
+                    <button 
+                      onClick={() => removeSkill(skill)}
+                      className='p-1 hover:bg-gray-100 rounded transition-colors'
+                    >
+                      <RxCross1 className='w-3 h-3 text-gray-500 hover:text-gray-700' />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className='flex gap-2'>
+              <input 
+                type="text" 
+                placeholder="Add new skill"
+                value={newSkills} 
+                onChange={(e) => setNewSkills(e.target.value)}
+                className='flex-1 h-10 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none text-sm'
+              />
+              <button 
+                onClick={addSkill}
+                className='px-4 h-10 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200 font-medium text-sm'
               >
                 Add
               </button>
             </div>
           </div>
 
-          {/* SAVE BUTTON */}
-          <button
-            type="submit"
-            className="w-full bg-blue-500 text-white py-2 rounded-lg font-semibold shadow-md hover:bg-blue-600 transition-all duration-200 mt-3"
-            onClick={()=>handleSaveProfile()}
+          {/* Education Section */}
+          <div className="border border-gray-200 rounded-xl p-4 bg-gray-50/50">
+            <h3 className='text-lg font-semibold text-gray-800 mb-3'>Education</h3>
+            {education.length > 0 && (
+              <div className='space-y-3 mb-4'>
+                {education.map((edu, index) => (
+                  <div 
+                    key={index} 
+                    className='bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex justify-between items-start'
+                  >
+                    <div className='flex-1'>
+                      <div className='font-medium text-gray-900'>{edu.college}</div>
+                      <div className='text-sm text-gray-600'>{edu.degree} in {edu.fieldOfStudy}</div>
+                    </div>
+                    <button 
+                      onClick={() => removeEducation(edu)}
+                      className='p-2 hover:bg-gray-100 rounded-lg transition-colors ml-2'
+                    >
+                      <RxCross1 className='w-4 h-4 text-gray-500 hover:text-gray-700' />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className='space-y-3'>
+              <input 
+                type="text" 
+                placeholder="College/University"
+                value={newEducation.college} 
+                onChange={(e) => setNewEducation({...newEducation, college: e.target.value})}
+                className='w-full h-10 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none text-sm'
+              />
+              <input 
+                type="text" 
+                placeholder="Degree"
+                value={newEducation.degree} 
+                onChange={(e) => setNewEducation({...newEducation, degree: e.target.value})}
+                className='w-full h-10 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none text-sm'
+              />
+              <input 
+                type="text" 
+                placeholder="Field of Study"
+                value={newEducation.fieldOfStudy} 
+                onChange={(e) => setNewEducation({...newEducation, fieldOfStudy: e.target.value})}
+                className='w-full h-10 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none text-sm'
+              />
+              <button 
+                onClick={addEducation}
+                className='w-full h-10 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200 font-medium text-sm'
+              >
+                Add Education
+              </button>
+            </div>
+          </div>
+
+          {/* Experience Section */}
+          <div className="border border-gray-200 rounded-xl p-4 bg-gray-50/50">
+            <h3 className='text-lg font-semibold text-gray-800 mb-3'>Experience</h3>
+            {experience.length > 0 && (
+              <div className='space-y-3 mb-4'>
+                {experience.map((exp, index) => (
+                  <div 
+                    key={index} 
+                    className='bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex justify-between items-start'
+                  >
+                    <div className='flex-1'>
+                      <div className='font-medium text-gray-900'>{exp.title}</div>
+                      <div className='text-sm text-gray-600'>{exp.company}</div>
+                      <div className='text-sm text-gray-500 mt-1'>{exp.description}</div>
+                    </div>
+                    <button 
+                      onClick={() => removeExperience(exp)}
+                      className='p-2 hover:bg-gray-100 rounded-lg transition-colors ml-2'
+                    >
+                      <RxCross1 className='w-4 h-4 text-gray-500 hover:text-gray-700' />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className='space-y-3'>
+              <input 
+                type="text" 
+                placeholder="Job Title"
+                value={newExperience.title} 
+                onChange={(e) => setNewExperience({...newExperience, title: e.target.value})}
+                className='w-full h-10 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none text-sm'
+              />
+              <input 
+                type="text" 
+                placeholder="Company"
+                value={newExperience.company} 
+                onChange={(e) => setNewExperience({...newExperience, company: e.target.value})}
+                className='w-full h-10 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none text-sm'
+              />
+              <input 
+                type="text" 
+                placeholder="Description"
+                value={newExperience.description} 
+                onChange={(e) => setNewExperience({...newExperience, description: e.target.value})}
+                className='w-full h-10 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 outline-none text-sm'
+              />
+              <button 
+                onClick={addExperience}
+                className='w-full h-10 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200 font-medium text-sm'
+              >
+                Add Experience
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Save Button */}
+        <div className='flex gap-3 pt-6 mt-4 border-t border-gray-200'>
+          <button 
+            onClick={() => setEdit(false)}
+            className='flex-1 h-12 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200 font-medium'
           >
-            Save Changes
+            Cancel
           </button>
-        </form>
+          <button 
+            onClick={handleSaveProfile}
+            disabled={saving}
+            className={`flex-1 h-12 rounded-lg font-medium transition-all duration-200 ${
+              saving 
+                ? 'bg-gray-400 cursor-not-allowed' 
+                : 'bg-blue-500 hover:bg-blue-600 text-white shadow-lg hover:shadow-xl'
+            }`}
+          >
+            {saving ? (
+              <div className='flex items-center justify-center gap-2'>
+                <div className='w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin'></div>
+                Saving...
+              </div>
+            ) : (
+              'Save Profile'
+            )}
+          </button>
+        </div>
       </div>
     </div>
-  );
+  )
 }
 
-export default EditProfile;
+export default EditProfile

@@ -1,143 +1,270 @@
-import React, { useContext, useState, useRef, useEffect } from "react";
-import icon from "../assets/icon.png";
-import { CiSearch } from "react-icons/ci";
-import { IoMdHome } from "react-icons/io";
-import { FaUser } from "react-icons/fa";
-import { IoNotifications, IoClose } from "react-icons/io5";
+import React, { useContext, useEffect, useState } from 'react'
+import logo2 from "../assets/icon.png"
+import { IoSearchSharp } from "react-icons/io5";
+import { TiHome } from "react-icons/ti";
+import { FaUserGroup } from "react-icons/fa6";
+import { IoNotificationsSharp } from "react-icons/io5";
+import { IoSettingsOutline } from "react-icons/io5";
+import { MdLogout } from "react-icons/md";
 import dp from "../assets/dp.jpg";
-import { UserDataContext } from "../context/userContext";
-import { authDataContext } from "../context/AuthContext";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { userDataContext } from '../context/UserContext';
+import { authDataContext } from '../context/AuthContext';
+import axios from 'axios';
+import { Navigate, useNavigate } from 'react-router-dom';
 
-const Nav = () => {
-  const [activeSearch, setActiveSearch] = useState(false);
-  const [showProfileMenu, setShowProfileMenu] = useState(false);
-  const { userData,setUserData } = useContext(UserDataContext);
-  const { serverUrl } = useContext(authDataContext);
-  const navigate = useNavigate();
-  const menuRef = useRef();
+function Nav() {
+    let [activeSearch, setActiveSearch] = useState(false)
+    let { userData, setUserData, handleGetProfile } = useContext(userDataContext)
+    let [showPopup, setShowPopup] = useState(false)
+    let navigate = useNavigate()
+    let { serverUrl } = useContext(authDataContext)
+    let [searchInput, setSearchInput] = useState("")
+    let [searchData, setSearchData] = useState([])
 
-  // Close profile menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
-        setShowProfileMenu(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  const handleLogout = async () => {
-    const confirmLogout = window.confirm("Are you sure you want to logout?");
-    if (!confirmLogout) return;
-
-    try {
-      await axios.get(`${serverUrl}/api/auth/logout`, { withCredentials: true });
-      setUserData(null)
-      navigate("/login"); // ✅ Redirects to login page after logout
-    } catch (error) {
-      console.error("Logout failed:", error);
+    const handleSignOut = async () => {
+        try {
+            let result = await axios.get(serverUrl + "/api/auth/logout", { withCredentials: true })
+            setUserData(null)
+            navigate("/login")
+            console.log(result);
+        } catch (error) {
+            console.log(error);
+        }
     }
-  };
 
-  return (
-    <nav className="w-full h-[80px] bg-white fixed top-0 shadow-md flex justify-between md:justify-around items-center px-4 z-50">
-      {/* Left Section */}
-      <div className="flex items-center gap-3">
-        <img src={icon} alt="Logo" className="w-[45px] h-[45px]" />
+    const handleSearch = async () => {
+        try {
+            if (searchInput.trim()) {
+                let result = await axios.get(`${serverUrl}/api/user/search?query=${searchInput}`, { withCredentials: true })
+                setSearchData(result.data)
+            } else {
+                setSearchData([])
+            }
+        } catch (error) {
+            setSearchData([])
+            console.log(error)
+        }
+    }
 
-        {/* Search Icon (mobile only) */}
-        {!activeSearch && (
-          <CiSearch
-            className="w-[25px] h-[25px] text-gray-600 lg:hidden cursor-pointer"
-            onClick={() => setActiveSearch(true)}
-          />
-        )}
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            handleSearch()
+        }, 300) // Debounce search
 
-        {/* Search Bar */}
-        <form
-          className={`flex items-center gap-2 border border-gray-300 px-4 py-2 bg-gray-100 rounded-full transition-all duration-300 ${
-            activeSearch ? "flex animate-fadeIn" : "hidden"
-          } lg:flex`}
-          aria-label="Search"
-        >
-          <CiSearch className="text-xl text-gray-600" />
-          <input
-            type="text"
-            placeholder="Search..."
-            className="bg-transparent outline-none text-gray-700 w-[200px] sm:w-[300px]"
-          />
-          <IoClose
-            className="text-2xl text-gray-500 cursor-pointer lg:hidden"
-            onClick={() => setActiveSearch(false)}
-          />
-        </form>
-      </div>
+        return () => clearTimeout(timeoutId)
+    }, [searchInput])
 
-      {/* Right Section */}
-      <div className="flex items-center gap-6 relative">
-        {/* Home */}
-        <div className="hidden lg:flex flex-col items-center cursor-pointer hover:text-blue-600">
-          <IoMdHome className="text-2xl" />
-          <span className="text-sm">Home</span>
-        </div>
+    // Close search results when clicking outside
+    useEffect(() => {
+        const handleClickOutside = () => {
+            setSearchData([])
+        }
 
-        {/* My Network */}
-        <div className="hidden lg:flex flex-col items-center cursor-pointer hover:text-blue-600">
-          <FaUser className="text-2xl" />
-          <span className="text-sm">My Network</span>
-        </div>
+        document.addEventListener('click', handleClickOutside)
+        return () => document.removeEventListener('click', handleClickOutside)
+    }, [])
 
-        {/* Notifications */}
-        <div className="flex flex-col items-center cursor-pointer hover:text-blue-600">
-          <IoNotifications className="text-2xl" />
-          <span className="text-sm hidden md:block">Notifications</span>
-        </div>
+    return (
+        <div className='w-full h-20 bg-white fixed top-0 shadow-sm border-b border-gray-100 flex justify-between items-center px-4 md:px-8 lg:px-16 left-0 z-50'>
+            {/* Left Section - Logo & Search */}
+            <div className='flex items-center gap-4 flex-1'>
+                {/* Logo */}
+                <div 
+                    onClick={() => {
+                        setActiveSearch(false)
+                        navigate("/")
+                    }}
+                    className='cursor-pointer transform hover:scale-105 transition-transform duration-200'
+                >
+                    <img src={logo2} alt="Logo" className='w-12 h-12 md:w-14 md:h-14' />
+                </div>
 
-        {/* Profile Picture */}
-        <div
-          className="w-[45px] h-[45px] rounded-full overflow-hidden border border-gray-300 cursor-pointer"
-          onClick={() => setShowProfileMenu(!showProfileMenu)}
-        >
-          <img src={userData.profileImage || dp} alt="Profile" className="w-full h-full object-cover" />
-        </div>
+                {/* Mobile Search Toggle */}
+                {!activeSearch && (
+                    <button 
+                        className='lg:hidden p-2 hover:bg-gray-100 rounded-full transition-colors duration-200'
+                        onClick={() => setActiveSearch(true)}
+                    >
+                        <IoSearchSharp className='w-6 h-6 text-gray-600' />
+                    </button>
+                )}
 
-        {/* Profile Dropdown */}
-        {showProfileMenu && (
-          <div
-            ref={menuRef}
-            className="w-[280px] bg-white shadow-xl absolute top-[75px] right-0 rounded-lg flex flex-col items-center p-[20px] gap-[12px] animate-fadeIn"
-          >
-            <div className="w-[70px] h-[70px] rounded-full overflow-hidden border border-gray-300">
-              <img src={userData.profileImage || dp} alt="Profile" className="w-full h-full object-cover" />
+                {/* Search Bar */}
+                <div className={`relative ${!activeSearch ? "hidden lg:block" : "block"} flex-1 max-w-2xl`}>
+                    <form className='w-full h-12 bg-gray-50 flex items-center gap-3 px-4 py-2 rounded-xl border border-gray-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-200 transition-all duration-200'>
+                        <IoSearchSharp className='w-5 h-5 text-gray-400' />
+                        <input 
+                            type="text" 
+                            className='w-full h-full bg-transparent outline-none border-0 text-gray-700 placeholder-gray-500'
+                            placeholder='Search users...' 
+                            onChange={(e) => setSearchInput(e.target.value)}
+                            value={searchInput}
+                            onClick={(e) => e.stopPropagation()}
+                        />
+                    </form>
+
+                    {/* Search Results */}
+                    {searchData.length > 0 && (
+                        <div 
+                            className='absolute top-14 left-0 right-0 max-h-96 bg-white shadow-xl rounded-xl border border-gray-200 flex flex-col overflow-hidden z-50'
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className='p-3 border-b border-gray-100'>
+                                <h3 className='text-sm font-semibold text-gray-600'>Search Results</h3>
+                            </div>
+                            <div className='overflow-y-auto'>
+                                {searchData.map((sea, index) => (
+                                    <div 
+                                        key={sea._id || index}
+                                        className='flex gap-3 items-center p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors duration-200'
+                                        onClick={() => {
+                                            handleGetProfile(sea.userName)
+                                            setSearchData([])
+                                            setSearchInput("")
+                                            setActiveSearch(false)
+                                        }}
+                                    >
+                                        <div className='w-12 h-12 rounded-full overflow-hidden border-2 border-gray-200 flex-shrink-0'>
+                                            <img 
+                                                src={sea.profileImage || dp} 
+                                                alt={`${sea.firstName} ${sea.lastName}`}
+                                                className='w-full h-full object-cover'
+                                            />
+                                        </div>
+                                        <div className='flex-1 min-w-0'>
+                                            <div className='text-base font-semibold text-gray-800 truncate'>{`${sea.firstName} ${sea.lastName}`}</div>
+                                            <div className='text-sm text-gray-600 truncate'>{sea.headline}</div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
 
-            <div className="font-semibold text-gray-800 text-lg text-center">
-              {userData?.firstName} {userData?.lastName}
+            {/* Right Section - Navigation & Profile */}
+            <div className='flex items-center gap-4 md:gap-6'>
+                {/* Navigation Items */}
+                <button 
+                    className='flex flex-col items-center justify-center cursor-pointer text-gray-600 hover:text-blue-600 group p-2 rounded-lg hover:bg-blue-50 transition-all duration-200'
+                    onClick={() => navigate("/")}
+                >
+                    <TiHome className='w-6 h-6 group-hover:scale-110 transition-transform duration-200' />
+                    <div className='text-xs mt-1 hidden md:block'>Home</div>
+                </button>
+
+                <button 
+                    className='flex flex-col items-center justify-center text-gray-600 hover:text-blue-600 group p-2 rounded-lg hover:bg-blue-50 transition-all duration-200'
+                    onClick={() => navigate("/network")}
+                >
+                    <FaUserGroup className='w-6 h-6 group-hover:scale-110 transition-transform duration-200' />
+                    <div className='text-xs mt-1 hidden md:block'>Network</div>
+                </button>
+
+                <button 
+                    className='flex flex-col items-center justify-center text-gray-600 hover:text-blue-600 group p-2 rounded-lg hover:bg-blue-50 transition-all duration-200'
+                    onClick={() => navigate("/notification")}
+                >
+                    <div className='relative'>
+                        <IoNotificationsSharp className='w-6 h-6 group-hover:scale-110 transition-transform duration-200' />
+                        {/* Notification badge - you can add logic for count */}
+                        {/* <div className='absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center'>
+                            3
+                        </div> */}
+                    </div>
+                    <div className='text-xs mt-1 hidden md:block'>Notifications</div>
+                </button>
+
+                {/* Profile Dropdown */}
+                <div className='relative'>
+                    <button 
+                        className='w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden cursor-pointer border-2 border-transparent hover:border-blue-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-200'
+                        onClick={() => setShowPopup(prev => !prev)}
+                    >
+                        <img 
+                            src={userData?.profileImage || dp} 
+                            alt="Profile" 
+                            className='w-full h-full object-cover'
+                        />
+                    </button>
+
+                    {/* Profile Popup */}
+                    {showPopup && (
+                        <div className='absolute top-14 right-0 w-80 bg-white shadow-2xl rounded-xl border border-gray-200 flex flex-col p-4 z-50 animate-fade-in'>
+                            {/* Profile Header */}
+                            <div className='flex items-center gap-3 p-3 border-b border-gray-100'>
+                                <div className='w-14 h-14 rounded-full overflow-hidden border-2 border-gray-200'>
+                                    <img 
+                                        src={userData?.profileImage || dp} 
+                                        alt="Profile" 
+                                        className='w-full h-full object-cover'
+                                    />
+                                </div>
+                                <div className='flex-1 min-w-0'>
+                                    <div className='text-lg font-semibold text-gray-800 truncate'>{`${userData?.firstName} ${userData?.lastName}`}</div>
+                                    <div className='text-sm text-gray-600 truncate'>{userData?.headline || "Update your headline"}</div>
+                                </div>
+                            </div>
+
+                            {/* Action Buttons */}
+                            <button 
+                                className='w-full h-11 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200 font-medium mt-3 flex items-center justify-center gap-2'
+                                onClick={() => {
+                                    handleGetProfile(userData?.userName)
+                                    setShowPopup(false)
+                                }}
+                            >
+                                View Profile
+                            </button>
+
+                            {/* Menu Items */}
+                            <div className='space-y-1 mt-3'>
+                                <button 
+                                    className='w-full flex items-center gap-3 p-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-200'
+                                    onClick={() => {
+                                        navigate("/network")
+                                        setShowPopup(false)
+                                    }}
+                                >
+                                    <FaUserGroup className='w-5 h-5' />
+                                    <span>My Network</span>
+                                </button>
+                                
+                                <button 
+                                    className='w-full flex items-center gap-3 p-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-200'
+                                    onClick={() => {
+                                        navigate("/settings")
+                                        setShowPopup(false)
+                                    }}
+                                >
+                                    <IoSettingsOutline className='w-5 h-5' />
+                                    <span>Settings</span>
+                                </button>
+                            </div>
+
+                            {/* Sign Out */}
+                            <button 
+                                className='w-full flex items-center gap-3 p-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200 mt-2 border-t border-gray-100 pt-3'
+                                onClick={handleSignOut}
+                            >
+                                <MdLogout className='w-5 h-5' />
+                                <span className='font-medium'>Sign Out</span>
+                            </button>
+                        </div>
+                    )}
+                </div>
             </div>
 
-            <button className="bg-blue-500 text-white px-5 py-2 rounded-full hover:bg-blue-600 w-[80%] transition-all">
-              View Profile
-            </button>
+            {/* Backdrop for mobile search */}
+            {activeSearch && (
+                <div 
+                    className='fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden'
+                    onClick={() => setActiveSearch(false)}
+                />
+            )}
+        </div>
+    )
+}
 
-            <button className="flex items-center justify-center gap-2 bg-blue-500 text-white px-5 py-2 rounded-full hover:bg-blue-600 w-[80%] transition-all">
-              <FaUser className="text-md" />
-              <span>My Network</span>
-            </button>
-
-            <button
-              onClick={handleLogout}
-              className="bg-red-500 text-white px-5 py-2 rounded-full hover:bg-red-600 w-[80%] transition-all"
-            >
-              Logout
-            </button>
-          </div>
-        )}
-      </div>
-    </nav>
-  );
-};
-
-export default Nav;
+export default Nav
