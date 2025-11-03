@@ -12,7 +12,7 @@ export const uploadOnCloudinary = async (filePath) => {
     const result = await cloudinary.uploader.upload(filePath, {
       folder: "posts",
     });
-    fs.unlinkSync(filePath); // delete file locally
+    fs.unlinkSync(filePath);
     return result;
   } catch (error) {
     console.error("Cloudinary Upload Error:", error);
