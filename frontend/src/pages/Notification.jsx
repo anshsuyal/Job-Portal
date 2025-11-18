@@ -80,7 +80,7 @@ Notifications <span className='text-sky-500'>{notifications.length}</span>
                 <div className='flex items-center justify-between gap-4'>
                 <button className='flex flex-1 items-center gap-4 text-left'>
       <div className='h-14 w-14 overflow-hidden rounded-full border border-slate-200'>
-                  <img src={noti?.relatedUser?.profileImage || dp} alt={`${noti?.relatedUser?.firstName ?? ''} ${noti?.relatedUser?.lastName ?? ''}`.trim() || 'User profile'} className='h-full w-full object-cover'/>
+                  <img src={noti?.relatedUser?.profileImage || dp} alt={`${noti?.relatedUser?.firstName ?? ''} ${noti?.relatedUser?.lastName ?? ''}`.trim() || 'User profile'} loading="lazy" className='h-full w-full object-cover'/>
               </div>
               <div className='text-sm font-semibold text-slate-700'>
                 {`${noti?.relatedUser?.firstName ?? 'Someone'} ${noti?.relatedUser?.lastName ?? ''}`.trim()} {handleMessage(noti?.type)}
@@ -93,7 +93,7 @@ Notifications <span className='text-sky-500'>{notifications.length}</span>
                   {noti?.relatedPost?.image && 
                   <div className='ml-16 flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50/60 p-3'>
                   <div className='h-16 w-20 overflow-hidden rounded-xl border border-slate-200'>
-                  <img src={noti.relatedPost.image} alt="Post preview" className='h-full w-full object-cover'/>
+                  <img src={noti.relatedPost.image} alt="Post preview" loading="lazy" className='h-full w-full object-cover'/>
                   </div>
                   <div className='text-sm font-medium text-slate-600'>{noti.relatedPost.description}</div>
                </div>

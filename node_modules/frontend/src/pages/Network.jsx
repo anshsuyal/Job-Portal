@@ -74,7 +74,7 @@ try {
         <div className='flex items-center justify-between rounded-3xl border border-slate-200 bg-white p-5 shadow transition hover:shadow-lg' key={connection?._id}>
           <div className='flex items-center gap-4'>
 <div className='h-14 w-14 overflow-hidden rounded-full border border-slate-200'>
-            <img src={connection?.sender?.profileImage || dp} alt={`${connection?.sender?.firstName ?? ''} ${connection?.sender?.lastName ?? ''}`.trim() || 'User profile'} className='h-full w-full object-cover'/>
+            <img src={connection?.sender?.profileImage || dp} alt={`${connection?.sender?.firstName ?? ''} ${connection?.sender?.lastName ?? ''}`.trim() || 'User profile'} loading="lazy" className='h-full w-full object-cover'/>
         </div>
         <div className='flex flex-col'>
         <div className='text-base font-semibold text-slate-800'>{`${connection?.sender?.firstName ?? 'LinkedIn'} ${connection?.sender?.lastName ?? 'Member'}`.trim()}</div>

@@ -54,7 +54,7 @@ function Profile() {
         <div className='relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl'>
             <button className='relative h-52 w-full overflow-hidden bg-gradient-to-br from-sky-200 via-slate-200 to-white' onClick={()=>setEdit(true)}>
                     {profileData?.coverImage ? (
-                      <img src={profileData.coverImage} alt={`${fullName}'s cover`} className='h-full w-full object-cover'/>
+                      <img src={profileData.coverImage} alt={`${fullName}'s cover`} loading="lazy" className='h-full w-full object-cover'/>
                     ) : (
                       <div className='flex h-full w-full items-center justify-center text-sm font-semibold text-slate-500'>Click to add a cover photo</div>
                     )}
@@ -63,7 +63,7 @@ function Profile() {
                    <div className='px-8 pb-8 pt-4'>
                      <div className='-mt-16 flex flex-col items-start gap-6 lg:flex-row lg:items-end lg:justify-between'>
                      <button className='h-24 w-24 overflow-hidden rounded-full border-4 border-white shadow-lg transition hover:scale-[1.02]' onClick={()=>setEdit(true)}>
-                        <img src={profileData?.profileImage || dp} alt={`${fullName}'s profile`} className='h-full w-full object-cover'/>
+                        <img src={profileData?.profileImage || dp} alt={`${fullName}'s profile`} loading="lazy" className='h-full w-full object-cover'/>
                       
                     </button>
                     <div className='flex flex-1 flex-col gap-2'>

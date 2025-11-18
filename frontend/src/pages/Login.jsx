@@ -43,13 +43,13 @@ password
     <div className='flex min-h-screen w-full items-center justify-center bg-gradient-to-br from-slate-100 via-white to-sky-100 px-4 py-12'>
       <div className='relative flex w-full max-w-5xl flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl lg:flex-row'>
         <div className='hidden h-full flex-1 flex-col items-center justify-center gap-6 bg-gradient-to-br from-sky-500 via-sky-600 to-indigo-600 p-10 text-white lg:flex'>
-          <img src={logo} alt="LinkedIn logo" className='w-24 object-contain'/>
+          <img src={logo} alt="LinkedIn logo" loading="lazy" className='w-24 object-contain'/>
           <h2 className='text-3xl font-semibold leading-tight'>Welcome back to your professional community</h2>
           <p className='text-sm font-medium text-white/80'>Stay updated with your network, share insights, and build meaningful connections.</p>
         </div>
         <div className='flex w-full flex-col items-center px-6 py-10 lg:w-[420px]'>
           <div className='mb-8 flex w-full items-center justify-center lg:hidden'>
-            <img src={logo} alt="LinkedIn logo" className='w-20 object-contain'/>
+            <img src={logo} alt="LinkedIn logo" loading="lazy" className='w-20 object-contain'/>
           </div>
    <form className='flex w-full flex-col gap-5' onSubmit={handleSignIn}>
     <div className='text-center'>

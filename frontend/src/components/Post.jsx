@@ -102,9 +102,9 @@ function Post({ id, author, like, comment, description, image,createdAt }) {
             <button className='flex flex-1 items-start gap-4 text-left' onClick={handleNavigateProfile}>
                 <div className='h-14 w-14 overflow-hidden rounded-full border border-slate-200'>
                     {author?.profileImage ? (
-                      <img src={author.profileImage} alt={authorName} className='h-full w-full object-cover' />
+                      <img src={author.profileImage} alt={authorName} loading="lazy" className='h-full w-full object-cover' />
                     ) : (
-                      <img src={dp} alt="Default profile" className='h-full w-full object-cover' />
+                      <img src={dp} alt="Default profile" loading="lazy" className='h-full w-full object-cover' />
                     )}
                 </div>
                 <div className='flex flex-col'>
@@ -123,9 +123,9 @@ function Post({ id, author, like, comment, description, image,createdAt }) {
          <div className={`mt-4 w-full text-[15px] leading-relaxed text-slate-700 ${!more?"line-clamp-4":""}`}>{description ?? ''}</div>
          {description && description.length>160 && <button className='mt-3 text-sm font-semibold text-sky-500 transition hover:text-sky-600' onClick={()=>setMore(prev=>!prev)}>{more?"Show less":"Read more"}</button>}
 
-         {image && 
+{image && 
          <div className='mt-4 flex h-80 w-full items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-slate-50'>
-<img src={image} alt="Post attachment" className='h-full w-full object-cover'/>
+<img src={image} alt="Post attachment" loading="lazy" className='h-full w-full object-cover'/>
 </div>}
 
 <div className='mt-6'>
@@ -163,9 +163,9 @@ function Post({ id, author, like, comment, description, image,createdAt }) {
             <div className='flex items-center gap-3'>
             <div className='h-10 w-10 overflow-hidden rounded-full border border-slate-200'>
                     {com?.user?.profileImage ? (
-                      <img src={com.user.profileImage} alt={`${com?.user?.firstName ?? ''} ${com?.user?.lastName ?? ''}`} className='h-full w-full object-cover' />
+                      <img src={com.user.profileImage} alt={`${com?.user?.firstName ?? ''} ${com?.user?.lastName ?? ''}`} loading="lazy" className='h-full w-full object-cover' />
                     ) : (
-                      <img src={dp} alt="Default profile" className='h-full w-full object-cover' />
+                      <img src={dp} alt="Default profile" loading="lazy" className='h-full w-full object-cover' />
                     )}
                 </div> 
                 

@@ -94,7 +94,7 @@ if(!userData){
           <FiCamera className='h-5 w-5'/>
         </button>
         {userData.coverImage ? (
-          <img src={userData.coverImage} alt="Cover" className='h-full w-full object-cover'/>
+          <img src={userData.coverImage} alt="Cover" loading="lazy" className='h-full w-full object-cover'/>
         ) : (
           <div className='h-full w-full bg-gradient-to-br from-sky-200 via-slate-200 to-white'></div>
         )}
@@ -104,7 +104,7 @@ if(!userData){
           type='button'
           className='relative h-20 w-20 overflow-hidden rounded-full border-4 border-white shadow-lg transition hover:scale-[1.02]'
           onClick={()=>setEdit(true)}>
-            <img src={userData.profileImage || dp} alt={`${userData.firstName ?? ''} ${userData.lastName ?? ''}`.trim() || 'Profile picture'} className='h-full w-full object-cover'/>
+            <img src={userData.profileImage || dp} alt={`${userData.firstName ?? ''} ${userData.lastName ?? ''}`.trim() || 'Profile picture'} loading="lazy" className='h-full w-full object-cover'/>
           
         </button>
         <div>
@@ -128,7 +128,7 @@ if(!userData){
       <input type="file" ref={image} hidden onChange={handleImage}/>
           {frontendImage && (
           <div className='mt-4 flex h-56 w-full items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-slate-50'>
-            <img src={frontendImage} alt="Post preview" className='h-full w-full object-cover'/>
+            <img src={frontendImage} alt="Post preview" loading="lazy" className='h-full w-full object-cover'/>
           </div>
           )}
 
@@ -154,7 +154,7 @@ if(!userData){
       <div className='w-full max-w-2xl space-y-6 px-4 lg:px-0'>
         <div className='flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-lg'>
         <div className='h-14 w-14 overflow-hidden rounded-full border border-slate-200'>
-            <img src={userData.profileImage || dp} alt={`${userData.firstName ?? ''} ${userData.lastName ?? ''}`.trim() || 'Profile picture'} className='h-full w-full object-cover'/>
+            <img src={userData.profileImage || dp} alt={`${userData.firstName ?? ''} ${userData.lastName ?? ''}`.trim() || 'Profile picture'} loading="lazy" className='h-full w-full object-cover'/>
         </div>
         <button className='flex h-12 flex-1 items-center rounded-full border border-slate-200 bg-slate-50 px-5 text-left text-sm font-semibold text-slate-500 transition hover:border-sky-200 hover:bg-sky-50' onClick={()=>setUploadPost(true)}>Share something with your network...</button>
         </div>
@@ -174,7 +174,7 @@ if(!userData){
 {suggestedUser.map((su)=>(
   <button key={su?._id ?? su?.userName} className='flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50/60 p-3 text-left transition hover:border-sky-200 hover:bg-sky-50' onClick={()=>su?.userName && handleGetProfile(su.userName)}>
   <div className='h-12 w-12 overflow-hidden rounded-full border border-slate-200'>
-            <img src={su?.profileImage || dp} alt={`${su?.firstName ?? ''} ${su?.lastName ?? ''}`.trim() || 'Suggested user'} className='h-full w-full object-cover'/>
+            <img src={su?.profileImage || dp} alt={`${su?.firstName ?? ''} ${su?.lastName ?? ''}`.trim() || 'Suggested user'} loading="lazy" className='h-full w-full object-cover'/>
         </div>
         <div>
         <div className='text-sm font-semibold text-slate-800'>{`${su?.firstName ?? ''} ${su?.lastName ?? ''}`.trim() || 'LinkedIn Member'}</div>

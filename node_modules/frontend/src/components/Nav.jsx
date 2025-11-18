@@ -16,6 +16,7 @@ function Nav() {
     const [activeSearch,setActiveSearch]=useState(false)
     const {userData,setUserData,handleGetProfile}=useContext(userDataContext)
     const [showPopup,setShowPopup]=useState(false)
+    const [mobileMenuOpen,setMobileMenuOpen]=useState(false)
     const navigate=useNavigate()
 const {serverUrl}=useContext(authDataContext)
 const [searchInput,setSearchInput]=useState("")
@@ -56,8 +57,19 @@ useEffect(()=>{
   handleSearch(searchInput)
 },[searchInput,handleSearch])
 
+useEffect(()=>{
+  if(mobileMenuOpen){
+    setActiveSearch(false)
+  }
+},[mobileMenuOpen])
+
 const profileImage = userData?.profileImage || dp
 const userFullName = useMemo(()=>`${userData?.firstName ?? ''} ${userData?.lastName ?? ''}`.trim(),[userData])
+const navLinks=[
+  {label:'Home', icon:TiHome, onClick:()=>navigate('/')},
+  {label:'Network', icon:FaUserGroup, onClick:()=>navigate('/network')},
+  {label:'Notifications', icon:IoNotificationsSharp, onClick:()=>navigate('/notification')}
+]
 
   if(!userData){
     return null
@@ -74,7 +86,7 @@ const userFullName = useMemo(()=>`${userData?.firstName ?? ''} ${userData?.lastN
               setActiveSearch(false)
               navigate("/")
             }}>
-            <img src={logo2}alt="LinkedIn logo" className='w-10 object-contain lg:w-12'/>
+            <img src={logo2}alt="LinkedIn logo" loading="lazy" className='w-10 object-contain lg:w-12'/>
           </button>
           {!activeSearch && (
             <button
@@ -98,7 +110,7 @@ const userFullName = useMemo(()=>`${userData?.firstName ?? ''} ${userData?.lastN
                     className='flex items-center gap-4 rounded-xl border border-transparent bg-slate-50/40 p-3 text-left transition hover:border-sky-200 hover:bg-sky-50'
                     onClick={()=>sea?.userName && handleGetProfile(sea.userName)}>
                     <div className='h-12 w-12 shrink-0 overflow-hidden rounded-full border border-slate-200'>
-                      <img src={sea?.profileImage || dp} alt={`${sea?.firstName ?? ''} ${sea?.lastName ?? ''}`} className='h-full w-full object-cover'/>
+                      <img src={sea?.profileImage || dp} alt={`${sea?.firstName ?? ''} ${sea?.lastName ?? ''}`} loading="lazy" className='h-full w-full object-cover'/>
                     </div>
                     <div>
                       <div className='text-base font-semibold text-slate-800'>{`${sea?.firstName ?? ''} ${sea?.lastName ?? ''}`.trim() || 'LinkedIn Member'}</div>
@@ -127,7 +139,7 @@ const userFullName = useMemo(()=>`${userData?.firstName ?? ''} ${userData?.lastN
             <div className='absolute right-4 top-[78px] w-[300px] rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl'>
               <div className='flex flex-col items-center gap-4 text-center'>
                 <div className='h-20 w-20 overflow-hidden rounded-full border border-slate-200'>
-                  <img src={profileImage} alt={userFullName || 'Your profile'} className='h-full w-full object-cover'/>
+                  <img src={profileImage} alt={userFullName || 'Your profile'} loading="lazy" className='h-full w-full object-cover'/>
                 </div>
                 <div>
                   <div className='text-lg font-semibold text-slate-900'>{userFullName || 'LinkedIn Member'}</div>
@@ -154,31 +166,70 @@ const userFullName = useMemo(()=>`${userData?.firstName ?? ''} ${userData?.lastN
             </div>
           )}
 
+          <div className='hidden items-center gap-5 md:flex'>
+            {navLinks.map((link)=>(
+              <button
+                key={link.label}
+                className='flex flex-col items-center justify-center text-slate-500 transition hover:text-sky-500'
+                onClick={()=>{
+                  link.onClick()
+                  setMobileMenuOpen(false)
+                }}>
+                <link.icon className='h-5 w-5'/>
+                <span className='text-xs font-semibold'>{link.label}</span>
+              </button>
+            ))}
+          </div>
           <button
-            className='hidden flex-col items-center justify-center text-slate-500 transition hover:text-sky-500 lg:flex'
-            onClick={()=>navigate("/")}>
-            <TiHome className='h-6 w-6'/>
-            <span className='text-xs font-semibold'>Home</span>
-          </button>
-          <button
-            className='hidden cursor-pointer flex-col items-center justify-center text-slate-500 transition hover:text-sky-500 md:flex'
-            onClick={()=>navigate("/network")}>
-            <FaUserGroup className='h-5 w-5'/>
-            <span className='text-xs font-semibold'>Network</span>
-          </button>
-          <button
-            className='flex flex-col items-center justify-center text-slate-500 transition hover:text-sky-500'
-            onClick={()=>navigate("/notification")}>
-            <IoNotificationsSharp className='h-5 w-5'/>
-            <span className='hidden text-xs font-semibold md:block'>Notifications</span>
+            className='flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:border-sky-200 hover:text-sky-600 md:hidden'
+            aria-label='Toggle navigation menu'
+            onClick={()=>setMobileMenuOpen(prev=>!prev)}>
+            <span className='sr-only'>Toggle navigation</span>
+            <div className='space-y-1.5'>
+              <span className={`block h-0.5 w-5 rounded-full bg-current transition ${mobileMenuOpen?'translate-y-1.5 rotate-45':''}`}></span>
+              <span className={`block h-0.5 w-5 rounded-full bg-current transition ${mobileMenuOpen?'opacity-0':''}`}></span>
+              <span className={`block h-0.5 w-5 rounded-full bg-current transition ${mobileMenuOpen?'-translate-y-1.5 -rotate-45':''}`}></span>
+            </div>
           </button>
           <button
             className='h-11 w-11 overflow-hidden rounded-full border border-slate-200 shadow-sm transition hover:scale-[1.03]'
             onClick={()=>setShowPopup(prev=>!prev)}>
-            <img src={profileImage} alt={userFullName || 'Your profile'} className='h-full w-full object-cover'/>
+            <img src={profileImage} alt={userFullName || 'Your profile'} loading="lazy" className='h-full w-full object-cover'/>
           </button>
         </div>
       </div>
+      {mobileMenuOpen && (
+        <div className='fixed inset-0 z-[70] flex md:hidden' role="dialog" aria-modal="true">
+          <button className='h-full w-full bg-slate-900/40 backdrop-blur-sm' onClick={()=>setMobileMenuOpen(false)} aria-label='Close menu'></button>
+          <div className='ml-auto flex h-full w-64 flex-col gap-4 border-l border-slate-200 bg-white p-6 shadow-2xl'>
+            <div className='flex items-center gap-3'>
+              <div className='h-12 w-12 overflow-hidden rounded-full border border-slate-200'>
+                <img src={profileImage} alt={userFullName || 'Your profile'} loading="lazy" className='h-full w-full object-cover'/>
+              </div>
+              <div>
+                <p className='text-base font-semibold text-slate-900'>{userFullName || 'LinkedIn Member'}</p>
+                <button className='text-xs font-semibold text-sky-500' onClick={()=>{handleGetProfile(userData?.userName); setMobileMenuOpen(false);}}>View profile</button>
+              </div>
+            </div>
+            <div className='h-px w-full bg-slate-200'></div>
+            {navLinks.map((link)=>(
+              <button
+                key={`drawer-${link.label}`}
+                className='flex items-center gap-3 rounded-xl border border-transparent bg-slate-50/60 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-sky-200 hover:bg-sky-50'
+                onClick={()=>{
+                  link.onClick()
+                  setMobileMenuOpen(false)
+                }}>
+                <link.icon className='h-5 w-5'/>
+                {link.label}
+              </button>
+            ))}
+            <button className='mt-auto rounded-full border border-red-200 bg-red-50 py-2 text-sm font-semibold text-red-500 transition hover:border-red-300 hover:bg-red-100' onClick={handleSignOut}>
+              Sign Out
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
